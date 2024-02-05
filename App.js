@@ -1,23 +1,11 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
-import {
-  Text,
-  View,
-  StyleSheet,
-  SectionList,
-  SafeAreaView,
-  StatusBar,
-  Alert,
-} from 'react-native';
-import { Searchbar } from 'react-native-paper';
+import {useCallback, useEffect, useMemo, useState} from 'react';
+import {Alert, SafeAreaView, SectionList, StatusBar, StyleSheet, Text, View,} from 'react-native';
+import {Searchbar} from 'react-native-paper';
 import debounce from 'lodash.debounce';
-import {
-  createTable,
-  getMenuItems,
-  saveMenuItems,
-  filterByQueryAndCategories,
-} from './database';
+import {createTable, filterByQueryAndCategories, getMenuItems, saveMenuItems,} from './database';
 import Filters from './components/Filters';
-import { getSectionListData, useUpdateEffect } from './utils';
+import {getSectionListData, useUpdateEffect} from './utils';
+import {log} from 'expo/build/devtools/logger';
 
 const API_URL =
   'https://raw.githubusercontent.com/Meta-Mobile-Developer-PC/Working-With-Data-API/main/menu-items-by-category.json';
@@ -55,18 +43,36 @@ export default function App() {
    * @returns {Promise<any|*[]>}
    */
   const fetchData = async() => {
+    console.log('fetchData');
     try {
       const response = await fetch(API_URL);
       const data = await response.json();
-      data.map((item) => {
-        // api returns category as an object with a title property -> we need to flatten it into a string
-        item.category = item.category.title;
-      });
-      return data;
+
+      // double check if the data is in the expected format menu: object and its value is an array
+      if (!data.menu || !Array.isArray(data.menu)) {
+        console.error("Menu data is not available or not in the expected format");
+        return [{
+          id: 'error',
+          title: 'Data not in expected format',
+          price: 0,
+          category: 'Error',
+        }];
+      }
+      const updatedData = data.menu.map((item) => ({
+        ...item,
+        // api returns 'category' as an object with a title property -> we need to flatten it into a string
+        category: item.category.title,
+      }));
+      return updatedData;
     } catch(e) {
       // send error to the console
       console.log(e);
-      return [];
+      return [{
+        id: 'error',
+        title: 'Error fetching data',
+        price: 0,
+        category: 'Error',
+      }];
     }
   }
 
@@ -77,15 +83,21 @@ export default function App() {
     (async () => {
       try {
         await createTable();
-        let menuItems = await getMenuItems();
+        let tempMenuItems = await getMenuItems();
         // The application only fetches the menu data once from a remote URL
         // and then stores it into a SQLite database.
         // After that, every application restart loads the menu from the database
-        if (!menuItems.length) {
-          const menuItems = await fetchData();
-          saveMenuItems(menuItems);
+        if (!tempMenuItems.length) {
+          tempMenuItems = await fetchData();
+          console.log('menuitems', tempMenuItems);
+          if(tempMenuItems[0].id !== 'error') {
+            saveMenuItems(tempMenuItems);
+          } else {
+            Alert.alert('Error fetching data. Please try again later.');
+          }
         }
-        const sectionListData = getSectionListData(menuItems);
+        const sectionListData = getSectionListData(tempMenuItems);
+        console.log('sectionListData', sectionListData);
         setData(sectionListData);
       } catch (e) {
         // Handle error
@@ -108,6 +120,7 @@ export default function App() {
           query,
           activeCategories
         );
+        console.log('menuItems', menuItems);
         const sectionListData = getSectionListData(menuItems);
         setData(sectionListData);
       } catch (e) {
