@@ -1,11 +1,13 @@
-# Sample Snack app
+# Little Lemon App with API and SQLite
 
-Open the `App.js` file to start writing some code. You can preview the changes directly on your phone or tablet by scanning the **QR code** or use the iOS or Android emulators. When you're done, click **Save** and share the link!
+based on the starter code from Coursera course "Working with Data" in the React Native Specialization
 
-When you're ready to see everything that Expo provides (or if you want to use your own editor) you can **Download** your project and use it with [expo-cli](https://docs.expo.io/get-started/installation).
+https://www.coursera.org/learn/meta-working-with-data/home/welcome
 
-All projects created in Snack are publicly available, so you can easily share the link to this project via link, or embed it on a web page with the `<>` button.
+## Installation
 
-If you're having problems, you can tweet to us [@expo](https://twitter.com/expo) or ask in our [forums](https://forums.expo.io/c/snack).
+1. Clone the repository
+2. Run `yarn install` to install the dependencies
+3. Run `yarn start` to start the app
 
-Snack is Open Source. You can find the code on the [GitHub repo](https://github.com/expo/snack).
+Uses Expo SDK version 50

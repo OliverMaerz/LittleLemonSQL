@@ -1,10 +1,19 @@
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 
+/**
+ * Filters component
+ * @param onChange
+ * @param selections
+ * @param sections
+ * @returns {JSX.Element}
+ * @constructor
+ */
 const Filters = ({ onChange, selections, sections }) => {
   return (
     <View style={styles.filtersContainer}>
       {sections.map((section, index) => (
         <TouchableOpacity
+          key={index} // get rid of each row should have a unique "key" warning
           onPress={() => {
             onChange(index);
           }}
@@ -28,6 +37,10 @@ const Filters = ({ onChange, selections, sections }) => {
   );
 };
 
+/**
+ * Styles for the Filters component
+ * @type {{filtersContainer: {backgroundColor: string, alignItems: string, flexDirection: string, marginBottom: number}}}
+ */
 const styles = StyleSheet.create({
   filtersContainer: {
     backgroundColor: 'green',

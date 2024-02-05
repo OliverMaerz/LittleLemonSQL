@@ -23,6 +23,13 @@ const API_URL =
   'https://raw.githubusercontent.com/Meta-Mobile-Developer-PC/Working-With-Data-API/main/menu-items-by-category.json';
 const sections = ['Appetizers', 'Salads', 'Beverages'];
 
+/**
+ * Item component
+ * @param title
+ * @param price
+ * @returns {JSX.Element}
+ * @constructor
+ */
 const Item = ({ title, price }) => (
   <View style={styles.item}>
     <Text style={styles.title}>{title}</Text>
@@ -30,6 +37,11 @@ const Item = ({ title, price }) => (
   </View>
 );
 
+/**
+ * Main app component
+ * @returns {JSX.Element}
+ * @constructor
+ */
 export default function App() {
   const [data, setData] = useState([]);
   const [searchBarText, setSearchBarText] = useState('');
@@ -38,21 +50,34 @@ export default function App() {
     sections.map(() => false)
   );
 
+  /**
+   * Fetch data from API
+   * @returns {Promise<any|*[]>}
+   */
   const fetchData = async() => {
-    // 1. Implement this function
-    
-    // Fetch the menu from the API_URL endpoint. You can visit the API_URL in your browser to inspect the data returned
-    // The category field comes as an object with a property called "title". You just need to get the title value and set it under the key "category".
-    // So the server response should be slighly transformed in this function (hint: map function) to flatten out each menu item in the array,
-    return [];
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      data.map((item) => {
+        // api returns category as an object with a title property -> we need to flatten it into a string
+        item.category = item.category.title;
+      });
+      return data;
+    } catch(e) {
+      // send error to the console
+      console.log(e);
+      return [];
+    }
   }
 
+  /**
+   * Hook when the component mounts -> load items from db or api
+   */
   useEffect(() => {
     (async () => {
       try {
         await createTable();
         let menuItems = await getMenuItems();
-
         // The application only fetches the menu data once from a remote URL
         // and then stores it into a SQLite database.
         // After that, every application restart loads the menu from the database
@@ -60,7 +85,6 @@ export default function App() {
           const menuItems = await fetchData();
           saveMenuItems(menuItems);
         }
-
         const sectionListData = getSectionListData(menuItems);
         setData(sectionListData);
       } catch (e) {
@@ -131,7 +155,7 @@ export default function App() {
         sections={data}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <Item title={item.title} price={item.price} />
+          <Item title={item.title} price={item.price} key={item.id} />
         )}
         renderSectionHeader={({ section: { title } }) => (
           <Text style={styles.header}>{title}</Text>
@@ -141,6 +165,10 @@ export default function App() {
   );
 }
 
+/**
+ * Styles for the App component
+ * @type {{container: {backgroundColor: string, flex: number, paddingTop: number}, item: {padding: number, alignItems: string, flexDirection: string, justifyContent: string}, searchBar: {backgroundColor: string, shadowRadius: number, marginBottom: number, shadowOpacity: number}, header: {paddingVertical: number, backgroundColor: string, color: string, fontSize: number}, sectionList: {paddingHorizontal: number}, title: {color: string, fontSize: number}}}
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
